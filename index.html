@@ -106,25 +106,93 @@ body{background:radial-gradient(ellipse at 50% -18%,#1b2432 0,transparent 42%),v
  .preview-stage img,.preview-stage video{max-height:65vh}
  .preview-foot{gap:8px;flex-wrap:wrap}
 }
+
+/* Upload progress + touch interactions */
+.upload-progress{height:3px;background:#292d35;border-radius:9px;overflow:hidden;margin:-15px 0 18px;display:none}
+.upload-progress.show{display:block}
+.upload-progress>i{display:block;height:100%;width:0;background:var(--blue);transition:width .12s}
+.file{touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.file.touch-dragging{opacity:.35}
+.location.touch-target{border-color:var(--blue)!important;background:#1b3552!important;box-shadow:0 0 0 2px #3985f744}
+.drag-ghost{position:fixed;z-index:100;pointer-events:none;padding:10px 14px;border:1px solid #568ed5;border-radius:12px;background:#202a38;color:#fff;box-shadow:0 12px 35px #0008;font-size:12px;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn.danger{background:#3a2024;border-color:#63333b;color:#ff929b}
+.btn.danger:hover{background:#51272e}
+.preview-foot{align-items:center}
+@media(max-width:620px){.upload-progress{margin:-8px 0 16px}.preview-foot .btn{min-height:38px}}
+
+/* iOS Files-inspired icon layout */
+.location{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:14px;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:7px;padding:10px 5px 12px;position:relative;transition:background .18s}
+.location:hover{transform:none!important;background:#ffffff08!important}
+.location .folder-visual{width:100%;height:112px;display:grid;place-items:center;overflow:hidden}
+.folder-art{width:min(100%,150px);height:108px;filter:drop-shadow(0 4px 5px #0004)}
+.location .folder-cover{width:100%;height:100%;object-fit:cover;border-radius:13px}
+.location .folder-copy{width:100%;text-align:center;min-width:0}
+.location .folder-copy b{display:block;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#f5f6f8}
+.location .folder-copy small{font-size:12px;color:#9297a2;margin-top:3px}
+.location .folder-more{top:3px;right:5px;transform:none;z-index:2;background:#ffffff12;color:#c5cbd5;font-size:17px;padding:1px 6px;opacity:0}
+.location:active .folder-more,.location:hover .folder-more{opacity:1}
+.filegrid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px}
+.file{background:transparent!important;border:0!important;border-radius:13px;padding:9px 5px 12px;transition:background .18s}
+.file:hover{background:#ffffff08!important;transform:none!important}
+.preview{height:100px;background:transparent!important;margin-bottom:8px;border-radius:10px}
+.preview img,.preview video{object-fit:contain;border-radius:8px}
+.doc-icon{width:68px;height:84px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(145deg,#343b48,#202630);color:#dce8f7;font-size:23px;font-weight:700;box-shadow:0 5px 14px #0003;position:relative}
+.doc-icon:after{content:"";position:absolute;top:0;right:0;border-width:0 17px 17px 0;border-style:solid;border-color:transparent #111820 transparent transparent}
+.doc-icon.pdf-icon{background:linear-gradient(145deg,#ed7777,#b8323c);color:white;font-size:16px}
+.file-name{font-size:13px;font-weight:500;line-height:1.3;color:#f5f6f8;-webkit-line-clamp:2}
+.file-meta{font-size:11px;color:#9297a2;margin-top:4px}
+.section h2{font-size:17px;font-weight:650}
+@media(max-width:620px){
+ .shell{padding:15px 14px 105px}
+ .toolbar{margin-bottom:24px}
+ .brand b{font-size:17px}
+ .actions .btn:first-child{display:none}
+ .actions .btn.blue{width:38px;height:38px;padding:0;font-size:0;display:grid;place-items:center}
+ .actions .btn.blue:after{content:"+";font-size:24px;line-height:1}
+ .head{margin:5px 0 17px}
+ .head h1{font-size:29px}
+ .head p{display:none}
+ .search{margin-top:12px}
+ .locations{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .location{padding:7px 5px 12px;min-height:0}
+ .location .folder-visual{height:118px}
+ .folder-art{height:112px;width:min(100%,155px)}
+ .location .folder-copy b{font-size:15px}
+ .location .folder-copy small{font-size:13px}
+ .filegrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+ .preview{height:88px}
+ .doc-icon{width:58px;height:73px}
+ .file-name{font-size:11px}
+ .file-meta{font-size:9px}
+ .mobile-tabs{grid-template-columns:repeat(4,1fr);padding:9px 8px calc(9px + env(safe-area-inset-bottom));background:#17191ef2}
+ .mobile-tabs button{font-size:10px;gap:4px;min-height:43px}
+ .mobile-tabs button span{font-size:21px}
+ .mobile-tabs button.active{color:#78b3ff}
+}
 </style></head>
 <body><div class="shell">
-<header class="toolbar"><div class="brand"><div class="brand-icon">▤</div><b>Dosyalar</b></div><div class="actions"><button class="btn" id="newFolder">＋ Yeni klasör</button><button class="btn blue" id="upload">Yükle</button></div></header>
+<header class="toolbar"><div class="brand"><div class="brand-icon">▤</div><b>Dosyalar</b></div><div class="actions"><button class="btn" id="newFolder">＋ Yeni klasör</button><button class="btn blue" id="upload">Yükle</button></div></header><div class="upload-progress" id="uploadProgress"><i id="uploadProgressBar"></i></div>
 <div class="layout"><aside class="sidebar"><div>
 <div class="side-title">Sık Kullanılanlar</div>
 <button class="nav active" data-filter="all"><span class="ico">▦</span>Son Kullanılanlar</button><button class="nav" data-filter="image"><span class="ico">▧</span>Fotoğraflar</button><button class="nav" data-filter="video"><span class="ico">▶</span>Videolar</button><button class="nav" data-filter="recent"><span class="ico">◷</span>Son Eklenenler</button>
-<div class="side-title" style="margin-top:15px">Konumlar <button id="sideAdd" style="float:right;background:none;color:var(--blue)">＋</button></div><div id="sideFolders"></div>
+<div class="side-title" style="margin-top:15px">Klasörler <button id="sideAdd" style="float:right;background:none;color:var(--blue)">＋</button></div><div id="sideFolders"></div>
 </div></aside>
 <main class="main"><div class="head"><div><h1 id="title">Son Kullanılanlar</h1><p id="subtitle">Dosyalarına ve klasörlerine göz at.</p></div><div class="search"><input id="search" placeholder="Ara"></div></div>
 <div class="crumbs" id="crumbs"></div>
-<div class="section"><h2 id="folderHeading">Konumlar</h2><small id="folderCount"></small></div><div class="locations" id="folders"></div>
+<div class="section"><h2 id="folderHeading">Klasörler</h2><small id="folderCount"></small></div><div class="locations" id="folders"></div>
 <div class="section"><h2 id="fileHeading">Dosyalar</h2><div style="display:flex;gap:10px;align-items:center"><small id="count"></small><button class="btn" id="view">☷</button></div></div>
 <div class="filegrid" id="files"></div>
-<div class="drop-hint" id="drop"><span>Dosyaları buraya sürükleyip bırakabilir veya klasörün üzerine bırakabilirsin.</span><button class="btn" id="choose">Dosya seç</button></div>
+
 </main></div></div>
-<nav class="mobile-tabs" aria-label="Hızlı erişim"><button class="active" data-mobile-filter="all"><span>▦</span>Göz At</button><button data-mobile-filter="recent"><span>◷</span>Son Eklenen</button><button data-mobile-filter="image"><span>▧</span>Fotoğraflar</button><button data-mobile-filter="video"><span>▶</span>Videolar</button></nav>
+<nav class="mobile-tabs" aria-label="Alt menü">
+<button class="active" data-mobile-filter="all"><span>▦</span>Göz At</button>
+<button data-mobile-filter="recent"><span>◷</span>Son Eklenen</button>
+<button id="mobileSearch"><span>⌕</span>Ara</button>
+<button data-mobile-filter="image"><span>▧</span>Fotoğraflar</button>
+</nav>
 <input type="file" id="picker" multiple hidden>
 <div class="overlay" id="nameOverlay"><div class="modal"><h3 id="modalTitle">Yeni klasör</h3><p id="modalDesc">Klasör için bir ad gir.</p><input id="nameInput" placeholder="Klasör adı" maxlength="90"><div class="modal-actions"><button class="btn" id="cancel">Vazgeç</button><button class="btn blue" id="save">Oluştur</button></div></div></div>
-<div class="overlay" id="previewOverlay"><div class="preview-modal"><div class="preview-top"><b id="previewName"></b><button class="btn" id="closePreview">Kapat</button></div><div class="preview-stage" id="stage"></div><div class="preview-foot"><span id="previewMeta"></span><button class="btn" id="renameFile">Yeniden adlandır</button></div></div></div>
+<div class="overlay" id="previewOverlay"><div class="preview-modal"><div class="preview-top"><b id="previewName"></b><button class="btn" id="closePreview">Kapat</button></div><div class="preview-stage" id="stage"></div><div class="preview-foot"><span id="previewMeta"></span><div style="display:flex;gap:7px"><button class="btn danger" id="deleteFile">Sil</button><button class="btn" id="renameFile">Yeniden adlandır</button></div></div></div></div>
 <div class="context" id="menu"></div><div class="toast" id="toast"></div>
 <script>
 const DB='apple-files-archive',STORE='files';let db,folders=[],files=[],locationId=null,filter='all',list=false,menuId=null,modalCB=null,previewFile=null;
@@ -138,20 +206,35 @@ function childFolders(id){return folders.filter(f=>(f.parent||null)===(id||null)
 function bytes(n){return n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB';}
 function createdLabel(ts){return new Date(ts).toLocaleString('tr-TR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1900);}
-function folderIcon(){return '<span class="folder-large">📁</span>';}
+function folderIcon(){return '<svg class="folder-art" viewBox="0 0 160 130" aria-hidden="true"><defs><linearGradient id="folderBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#79d2f5"/><stop offset="1" stop-color="#249bd8"/></linearGradient></defs><path d="M8 25Q8 8 25 8h37q8 0 14 7l9 9h50q17 0 17 17v70q0 15-16 15H24Q8 126 8 110Z" fill="url(#folderBlue)" stroke="#58bce9" stroke-width="2"/><path d="M8 39q0-15 17-15h112q15 0 15 15v5H8Z" fill="#b9edff" opacity=".8"/><path d="M8 44q0-13 16-13h112q16 0 16 14v65q0 16-16 16H24Q8 126 8 110Z" fill="url(#folderBlue)" stroke="#4cb8e9" stroke-width="1.5"/></svg>'; }
 function promptName(title,desc,button,cb,value=''){ $('modalTitle').textContent=title;$('modalDesc').textContent=desc;$('save').textContent=button;$('nameInput').value=value;modalCB=cb;$('nameOverlay').classList.add('show');setTimeout(()=>$('nameInput').focus(),60);}
 function closePrompt(){$('nameOverlay').classList.remove('show');modalCB=null;}
 function createFolder(parent=locationId){promptName('Yeni klasör','Bu konumda yeni bir klasör oluştur.','Oluştur',name=>{folders.push({id:uid(),name,parent:parent||null,created:Date.now()});persistFolders();render();toast('Klasör oluşturuldu');});}
 function renameFolder(id){let f=folders.find(x=>x.id===id);if(f)promptName('Adını değiştir','Yeni klasör adını gir.','Kaydet',n=>{f.name=n;persistFolders();render();toast('Ad güncellendi');},f.name);}
 function deleteFolder(id){let f=folders.find(x=>x.id===id);if(!f||!confirm('“'+f.name+'” klasörü silinsin mi? İçindeki dosyalar Dosyalarım konumuna taşınır.'))return;let ids=[id];for(let i=0;i<ids.length;i++)folders.filter(x=>x.parent===ids[i]).forEach(x=>ids.push(x.id));files.forEach(x=>{if(ids.includes(x.folder))x.folder=null;});Promise.all(files.map(saveFile)).then(()=>{folders=folders.filter(x=>!ids.includes(x.id));persistFolders();locationId=null;render();});}
-function uploadThese(list,target=locationId){let arr=[...list];(async()=>{for(let f of arr){let type=f.type.startsWith('image/')?'image':f.type.startsWith('video/')?'video':'other';await saveFile({id:uid(),name:f.name,type,mime:f.type,size:f.size,created:Date.now(),folder:target||null,blob:f});}files=await allFiles();render();toast(arr.length+' dosya eklendi');})();}
-function render(){let q=$('search').value.trim().toLocaleLowerCase('tr');let child=childFolders(locationId);$('title').textContent=locationId?folderName(locationId):({all:'Son Kullanılanlar',image:'Fotoğraflar',video:'Videolar',recent:'Son Eklenenler'}[filter]);$('subtitle').textContent=locationId?'Bu klasördeki öğeler.':'Dosyalarına ve klasörlerine göz at.';$('folderHeading').textContent=locationId?'Alt Klasörler':'Konumlar';$('folderCount').textContent=child.length+' klasör';$('fileHeading').textContent='Dosyalar';
+async function uploadThese(list,target=locationId){
+ const arr=[...list];if(!arr.length)return;
+ const bar=$('uploadProgress'),fill=$('uploadProgressBar');bar.classList.add('show');fill.style.width='0%';
+ try{
+  const records=arr.map(f=>({id:uid(),name:f.name,type:f.type.startsWith('image/')?'image':f.type.startsWith('video/')?'video':'other',mime:f.type,size:f.size,created:Date.now(),folder:target||null,blob:f}));
+  // Küçük gruplar halinde tek transaction: tek tek dosya kaydetmekten çok daha az IndexedDB işlemi.
+  const batchSize=12;
+  for(let i=0;i<records.length;i+=batchSize){
+   const batch=records.slice(i,i+batchSize);
+   await new Promise((ok,no)=>{const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE);batch.forEach(record=>store.put(record));tx.oncomplete=ok;tx.onerror=()=>no(tx.error);tx.onabort=()=>no(tx.error||new Error('Yükleme iptal edildi'));});
+   fill.style.width=Math.round(Math.min(i+batch.length,records.length)/records.length*100)+'%';
+  }
+  files=await allFiles();render();toast(arr.length+' dosya yüklendi');
+ }catch(err){console.error(err);toast('Yükleme sırasında hata oluştu');files=await allFiles();render();}
+ finally{setTimeout(()=>{bar.classList.remove('show');fill.style.width='0%';},650);}
+}
+function render(){let q=$('search').value.trim().toLocaleLowerCase('tr');let child=childFolders(locationId);$('title').textContent=locationId?folderName(locationId):({all:'Son Kullanılanlar',image:'Fotoğraflar',video:'Videolar',recent:'Son Eklenenler'}[filter]);$('subtitle').textContent=locationId?'Bu klasördeki öğeler.':'Dosyalarına ve klasörlerine göz at.';$('folderHeading').textContent=locationId?'Alt Klasörler':'Klasörler';$('folderCount').textContent=child.length+' klasör';$('fileHeading').textContent='Dosyalar';
 let chain=[],f=folders.find(x=>x.id===locationId);while(f){chain.unshift(f);f=folders.find(x=>x.id===f.parent);}
 $('crumbs').innerHTML='<button data-root>Dosyalarım</button>'+chain.map(x=>' <span>›</span> <button data-crumb="'+x.id+'">'+esc(x.name)+'</button>').join('');
-$('folders').innerHTML=child.length?child.map(x=>{let cover=files.find(z=>z.id===x.cover&&z.type==='image');let coverURL=cover?URL.createObjectURL(cover.blob):'';return `<div class="location ${cover?'has-cover':''}" data-folder="${x.id}" data-drop="${x.id}" draggable="false">${cover?`<img class="folder-cover" src="${coverURL}" alt="">`:`<span class="folder-icon">📁</span>`}<span class="folder-copy"><b>${esc(x.name)}</b><small>${files.filter(z=>z.folder===x.id).length} öğe</small></span><button data-more="${x.id}" aria-label="Klasör seçenekleri" class="folder-more">···</button></div>`}).join(''):'<div style="font-size:11px;color:var(--muted)">Bu konumda klasör yok. <button id="inlineFolder" style="color:var(--blue);background:none">Yeni klasör oluştur</button></div>';
+$('folders').innerHTML=child.length?child.map(x=>{let cover=files.find(z=>z.id===x.cover&&z.type==='image');let coverURL=cover?URL.createObjectURL(cover.blob):'';let itemCount=files.filter(z=>z.folder===x.id).length+childFolders(x.id).length;return `<div class="location ${cover?'has-cover':''}" data-folder="${x.id}" data-drop="${x.id}" draggable="false"><button data-more="${x.id}" aria-label="Klasör seçenekleri" class="folder-more">···</button><div class="folder-visual">${cover?`<img class="folder-cover" src="${coverURL}" alt="">`:folderIcon()}</div><span class="folder-copy"><b>${esc(x.name)}</b><small>${itemCount} öğe</small></span></div>`}).join(''):'<div style="font-size:11px;color:var(--muted)">Bu konumda klasör yok. <button id="inlineFolder" style="color:var(--blue);background:none">Yeni klasör oluştur</button></div>';
 let arr=[...files];if(locationId)arr=arr.filter(x=>x.folder===locationId);else if(filter==='image')arr=arr.filter(x=>x.type==='image');else if(filter==='video')arr=arr.filter(x=>x.type==='video');else if(filter==='recent')arr.sort((a,b)=>b.created-a.created);if(q)arr=arr.filter(x=>x.name.toLocaleLowerCase('tr').includes(q)||folderName(x.folder).toLocaleLowerCase('tr').includes(q));$('count').textContent=arr.length+' öğe';
 let host=$('files');host.className=list?'filelist':'filegrid';if(!arr.length){host.innerHTML='<div class="empty"><b>Bu klasör boş</b>Dosya eklemek için Yükle düğmesini kullan veya dosyaları buraya sürükle.</div>';return;}
-host.innerHTML=arr.sort((a,b)=>b.created-a.created).map(x=>{let thumb=x.type==='image'?`<img src="${URL.createObjectURL(x.blob)}">`:x.type==='video'?`<video src="${URL.createObjectURL(x.blob)}" muted></video>`:`<span class="doc-icon">${x.mime==='application/pdf'?'▤':'▧'}</span>`;return `<div class="file" draggable="true" data-file="${x.id}"><div class="preview">${thumb}</div><div class="file-name">${esc(x.name)}</div><div class="file-meta">${createdLabel(x.created)} · ${bytes(x.size)}</div></div>`}).join('');
+host.innerHTML=arr.sort((a,b)=>b.created-a.created).map(x=>{let thumb=x.type==='image'?`<img src="${URL.createObjectURL(x.blob)}">`:x.type==='video'?`<video src="${URL.createObjectURL(x.blob)}" muted></video>`:`<span class="doc-icon ${x.mime==='application/pdf'?'pdf-icon':''}">${x.mime==='application/pdf'?'PDF':x.mime.includes('word')?'W':x.mime.includes('sheet')?'X':x.mime.includes('presentation')?'P':'▤'}</span>`;return `<div class="file" draggable="true" data-file="${x.id}"><div class="preview">${thumb}</div><div class="file-name">${esc(x.name)}</div><div class="file-meta">${createdLabel(x.created)} · ${bytes(x.size)}</div></div>`}).join('');
 $('sideFolders').innerHTML=folders.filter(x=>!x.parent).map(x=>`<div class="side-folder ${locationId===x.id?'active':''}" data-side="${x.id}"><span class="symbol">📁</span><span class="name">${esc(x.name)}</span><span class="num">${files.filter(z=>z.folder===x.id).length}</span></div>`).join('');
 }
 function showMenu(id,x,y){menuId=id;$('menu').innerHTML='<button data-act="open">Klasörü aç</button><button data-act="cover">Kapak fotoğrafı seç</button><button data-act="rename">Yeniden adlandır</button><button data-act="sub">Yeni alt klasör</button><button data-act="delete" class="danger">Sil</button>';$('menu').style.left=Math.min(x,innerWidth-180)+'px';$('menu').style.top=Math.min(y,innerHeight-150)+'px';$('menu').classList.add('show');}
@@ -159,24 +242,71 @@ function closeMenu(){$('menu').classList.remove('show');}
 function chooseFolderCover(id){let f=folders.find(x=>x.id===id);if(!f)return;let imgs=files.filter(x=>x.type==='image'&&(x.folder===id));if(!imgs.length){toast('Önce bu klasöre bir fotoğraf ekle');return;}let options=imgs.map((x,i)=>(i+1)+'. '+x.name).join('\\n');let answer=prompt('Kapak olarak kullanılacak fotoğrafın numarasını yaz:\\n\\n'+options);if(answer===null)return;let index=Number(answer)-1;if(!Number.isInteger(index)||index<0||index>=imgs.length){toast('Geçerli bir numara gir');return;}f.cover=imgs[index].id;persistFolders();render();toast('Klasör kapağı güncellendi');}
 function preview(id){let f=files.find(x=>x.id===id);if(!f)return;previewFile=f;$('previewName').textContent=f.name;$('previewMeta').textContent=bytes(f.size)+' · '+folderName(f.folder);let s=$('stage');s.innerHTML='';if(f.type==='image'){let i=document.createElement('img');i.src=URL.createObjectURL(f.blob);s.append(i);}else if(f.type==='video'){let v=document.createElement('video');v.src=URL.createObjectURL(f.blob);v.controls=true;s.append(v);}else s.textContent='Bu dosya türü önizlenemiyor.';$('previewOverlay').classList.add('show');}
 function closePreview(){$('previewOverlay').classList.remove('show');$('stage').innerHTML='';previewFile=null;}
-$('newFolder').onclick=$('sideAdd').onclick=()=>createFolder();$('upload').onclick=$('choose').onclick=()=>$('picker').click();$('picker').onchange=e=>{if(e.target.files.length)uploadThese(e.target.files);e.target.value='';};
+async function deleteFile(id){
+ const f=files.find(x=>x.id===id);if(!f)return;
+ if(!confirm('“'+f.name+'” dosyası kalıcı olarak silinsin mi?'))return;
+ await new Promise((ok,no)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(id);tx.oncomplete=ok;tx.onerror=()=>no(tx.error);});
+ folders.forEach(folder=>{if(folder.cover===id)delete folder.cover;});persistFolders();
+ files=await allFiles();closePreview();render();toast('Dosya silindi');
+}
+$('newFolder').onclick=$('sideAdd').onclick=()=>createFolder();$('upload').onclick=()=>$('picker').click();$('picker').onchange=e=>{if(e.target.files.length)uploadThese(e.target.files);e.target.value='';};
 $('save').onclick=()=>{let n=$('nameInput').value.trim();if(!n)return;modalCB?.(n);closePrompt();};$('cancel').onclick=closePrompt;$('nameInput').onkeydown=e=>{if(e.key==='Enter')$('save').click();if(e.key==='Escape')closePrompt();};
 $('view').onclick=()=>{list=!list;$('view').textContent=list?'▦':'☷';render();};$('search').oninput=render;
 document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>{filter=n.dataset.filter;locationId=null;document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x===n));render();});
 document.querySelectorAll('[data-mobile-filter]').forEach(n=>n.onclick=()=>{filter=n.dataset.mobileFilter;locationId=null;document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.filter===filter));document.querySelectorAll('[data-mobile-filter]').forEach(x=>x.classList.toggle('active',x===n));render();});
+$('mobileSearch').onclick=()=>{document.querySelectorAll('[data-mobile-filter]').forEach(x=>x.classList.remove('active'));$('mobileSearch').classList.add('active');locationId=null;$('search').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>$('search').focus(),250);};
 $('folders').onclick=e=>{let more=e.target.closest('[data-more]');if(more){e.stopPropagation();showMenu(more.dataset.more,e.clientX,e.clientY);return;}let x=e.target.closest('[data-folder]');if(x){locationId=x.dataset.folder;filter='all';render();}};
 $('sideFolders').onclick=e=>{let x=e.target.closest('[data-side]');if(x){locationId=x.dataset.side;filter='all';render();}};
 $('crumbs').onclick=e=>{if(e.target.closest('[data-root]')){locationId=null;filter='all';render();}let x=e.target.closest('[data-crumb]');if(x){locationId=x.dataset.crumb;render();}};
 $('folders').addEventListener('click',e=>{if(e.target.id==='inlineFolder')createFolder();});
 $('menu').onclick=e=>{let a=e.target.dataset.act;if(!a)return;let id=menuId;closeMenu();if(a==='open'){locationId=id;render();}if(a==='cover')chooseFolderCover(id);if(a==='rename')renameFolder(id);if(a==='sub')createFolder(id);if(a==='delete')deleteFolder(id);};
 document.addEventListener('click',e=>{if(!e.target.closest('#menu')&&!e.target.closest('[data-more]'))closeMenu();});
-$('files').onclick=e=>{let x=e.target.closest('[data-file]');if(x)preview(x.dataset.file);};
+$('files').onclick=e=>{let x=e.target.closest('[data-file]');if(x&&!suppressFileClick)preview(x.dataset.file);};
+$('deleteFile').onclick=()=>{if(previewFile)deleteFile(previewFile.id);};
 $('renameFile').onclick=()=>{if(!previewFile)return;let f=previewFile;promptName('Yeniden adlandır','Dosya için yeni bir ad gir.','Kaydet',async n=>{f.name=n;await saveFile(f);files=await allFiles();closePreview();render();},f.name);};
 $('closePreview').onclick=closePreview;$('previewOverlay').onclick=e=>{if(e.target===$('previewOverlay'))closePreview();};
 $('files').addEventListener('dragstart',e=>{let x=e.target.closest('[data-file]');if(x){e.dataTransfer.setData('text/plain',x.dataset.file);e.dataTransfer.effectAllowed='move';}});
 $('folders').addEventListener('dragover',e=>{if(e.target.closest('[data-drop]'))e.preventDefault();});
 $('folders').addEventListener('drop',async e=>{let x=e.target.closest('[data-drop]');if(!x)return;e.preventDefault();let id=e.dataTransfer.getData('text/plain'),f=files.find(z=>z.id===id);if(f){f.folder=x.dataset.drop;await saveFile(f);files=await allFiles();render();toast('Dosya taşındı');}else if(e.dataTransfer.files.length)uploadThese(e.dataTransfer.files,x.dataset.drop);});
-let drop=$('drop');['dragover','dragenter'].forEach(k=>drop.addEventListener(k,e=>{e.preventDefault();drop.classList.add('over');}));['dragleave','drop'].forEach(k=>drop.addEventListener(k,e=>{e.preventDefault();drop.classList.remove('over');}));drop.addEventListener('drop',e=>{if(e.dataTransfer.files.length)uploadThese(e.dataTransfer.files);});
+// iPhone/iPad: dosyaya basılı tutup klasörün üzerine bırakarak taşı.
+let touchDrag=null,touchTimer=null,touchGhost=null,suppressFileClick=false;
+$('files').addEventListener('pointerdown',e=>{
+ if(e.pointerType!=='touch')return;
+ const tile=e.target.closest('[data-file]');if(!tile)return;
+ clearTimeout(touchTimer);
+ touchDrag={id:tile.dataset.file,startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY,active:false,tile};
+ touchTimer=setTimeout(()=>{
+  if(!touchDrag)return;
+  touchDrag.active=true;suppressFileClick=true;tile.classList.add('touch-dragging');
+  touchGhost=document.createElement('div');touchGhost.className='drag-ghost';touchGhost.textContent='📄 '+(files.find(f=>f.id===touchDrag.id)?.name||'Dosya');document.body.append(touchGhost);
+  moveTouchGhost(touchDrag.x,touchDrag.y);if(navigator.vibrate)navigator.vibrate(25);
+ },430);
+},{passive:true});
+function moveTouchGhost(x,y){
+ if(touchGhost){touchGhost.style.left=Math.min(x+12,innerWidth-205)+'px';touchGhost.style.top=Math.min(y+12,innerHeight-55)+'px';}
+ document.querySelectorAll('.location.touch-target').forEach(el=>el.classList.remove('touch-target'));
+ if(touchDrag?.active){const el=document.elementFromPoint(x,y)?.closest('[data-folder]');if(el)el.classList.add('touch-target');}
+}
+document.addEventListener('pointermove',e=>{
+ if(!touchDrag||e.pointerType!=='touch')return;
+ touchDrag.x=e.clientX;touchDrag.y=e.clientY;
+ if(!touchDrag.active&&Math.hypot(e.clientX-touchDrag.startX,e.clientY-touchDrag.startY)>12){clearTimeout(touchTimer);touchTimer=null;return;}
+ if(touchDrag.active){e.preventDefault();moveTouchGhost(e.clientX,e.clientY);}
+},{passive:false});
+async function finishTouchDrag(e){
+ if(!touchDrag||e.pointerType!=='touch')return;
+ clearTimeout(touchTimer);const state=touchDrag;touchDrag=null;
+ document.querySelectorAll('.touch-target').forEach(el=>el.classList.remove('touch-target'));
+ if(touchGhost){touchGhost.remove();touchGhost=null;}
+ state.tile.classList.remove('touch-dragging');
+ if(state.active){
+  const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-folder]');
+  if(target){const f=files.find(x=>x.id===state.id);if(f){f.folder=target.dataset.folder;await saveFile(f);files=await allFiles();render();toast('Dosya klasöre taşındı');}}
+  setTimeout(()=>{suppressFileClick=false;},350);
+ }else{setTimeout(()=>{suppressFileClick=false;},80);}
+}
+document.addEventListener('pointerup',finishTouchDrag);
+document.addEventListener('pointercancel',finishTouchDrag);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePrompt();closePreview();closeMenu();}if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='u'){e.preventDefault();$('picker').click();}});
 (async()=>{try{db=await openDB();folders=JSON.parse(localStorage.getItem('apple-files-folders')||'[]');files=await allFiles();render();}catch(e){toast('Tarayıcı depolaması açılamadı.');}})();
 </script></body></html>
