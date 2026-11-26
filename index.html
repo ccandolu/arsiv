@@ -361,6 +361,13 @@ button:focus-visible,.file:focus-visible,.location:focus-visible{outline:2px sol
 .preview video{background:#111318}
 .preview-stage video{background:#090a0d}
 @supports not (height:100dvh){.preview-modal{max-height:calc(100vh - 28px)}}
+
+/* Mobile: keep folder creation reachable; the earlier compact rule hid it on iPhone */
+@media(max-width:620px){
+ .actions .btn:first-child{display:inline-flex!important;align-items:center;justify-content:center;min-height:36px;padding:0 10px!important;font-size:11px!important;white-space:nowrap}
+ .actions .upload-button{width:36px!important;height:36px!important;min-width:36px;padding:0!important}
+ .actions{display:flex;align-items:center;gap:7px}
+}
 </style></head>
 <body><div class="shell">
 <header class="toolbar"><div class="brand"><div class="brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4.75h14a1.25 1.25 0 0 1 1.25 1.25v12A1.25 1.25 0 0 1 19 19.25H5A1.25 1.25 0 0 1 3.75 18V6A1.25 1.25 0 0 1 5 4.75Z" stroke="currentColor" stroke-width="1.6"/><path d="M7 8h10M7 11h10M7 14h10M7 17h6" stroke="currentColor" stroke-width="1.45" stroke-linecap="round"/></svg></div><b>Dosyalar</b></div><div class="actions"><button class="btn" id="newFolder">＋ Yeni klasör</button><button class="btn blue upload-button" id="upload" aria-label="Dosya veya klasör yükle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button></div></header><div class="upload-progress" id="uploadProgress"><i id="uploadProgressBar"></i></div>
@@ -413,7 +420,15 @@ function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setT
 function folderIcon(){return '<svg class="folder-art" viewBox="0 0 160 130" aria-hidden="true"><defs><linearGradient id="folderBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#79d2f5"/><stop offset="1" stop-color="#249bd8"/></linearGradient></defs><path d="M8 25Q8 8 25 8h37q8 0 14 7l9 9h50q17 0 17 17v70q0 15-16 15H24Q8 126 8 110Z" fill="url(#folderBlue)" stroke="#58bce9" stroke-width="2"/><path d="M8 39q0-15 17-15h112q15 0 15 15v5H8Z" fill="#b9edff" opacity=".8"/><path d="M8 44q0-13 16-13h112q16 0 16 14v65q0 16-16 16H24Q8 126 8 110Z" fill="url(#folderBlue)" stroke="#4cb8e9" stroke-width="1.5"/></svg>'; }
 function promptName(title,desc,button,cb,value=''){ $('modalTitle').textContent=title;$('modalDesc').textContent=desc;$('save').textContent=button;$('nameInput').value=value;modalCB=cb;$('nameOverlay').classList.add('show');setTimeout(()=>$('nameInput').focus(),60);}
 function closePrompt(){$('nameOverlay').classList.remove('show');modalCB=null;}
-function createFolder(parent=locationId){promptName('Yeni klasör','Bu konumda yeni bir klasör oluştur.','Oluştur',name=>{folders.push({id:uid(),name,parent:parent||null,created:Date.now()});persistFolders();render();toast('Klasör oluşturuldu');});}
+function createFolder(parent=locationId){
+ promptName('Yeni klasör','Bu konumda yeni bir klasör oluştur.','Oluştur',name=>{
+  const clean=name.trim();if(!clean){toast('Klasör adı boş olamaz');return;}
+  if(folders.some(f=>(f.parent||null)===(parent||null)&&f.name.toLocaleLowerCase('tr')===clean.toLocaleLowerCase('tr'))){toast('Bu isimde bir klasör zaten var');return;}
+  folders.push({id:uid(),name:clean,parent:parent||null,created:Date.now()});
+  try{persistFolders();render();toast('Klasör oluşturuldu');}
+  catch(error){folders.pop();console.error(error);toast('Klasör kaydedilemedi. Tarayıcı depolamasını kontrol et.');}
+ });
+}
 function renameFolder(id){let f=folders.find(x=>x.id===id);if(f)promptName('Adını değiştir','Yeni klasör adını gir.','Kaydet',n=>{f.name=n;persistFolders();render();toast('Ad güncellendi');},f.name);}
 function deleteFolder(id){let f=folders.find(x=>x.id===id);if(!f||!confirm('“'+f.name+'” klasörü silinsin mi? İçindeki dosyalar Dosyalarım konumuna taşınır.'))return;let ids=[id];for(let i=0;i<ids.length;i++)folders.filter(x=>x.parent===ids[i]).forEach(x=>ids.push(x.id));files.forEach(x=>{if(ids.includes(x.folder))x.folder=null;});Promise.all(files.map(saveFile)).then(()=>{folders=folders.filter(x=>!ids.includes(x.id));persistFolders();locationId=null;render();});}
 async function uploadThese(fileList,target=locationId){
